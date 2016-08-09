@@ -1,9 +1,9 @@
 <!doctype html>
 <html>
 <head>
-    <title>chat</title>
+    <title>a simple danmu</title>
     <style>
-        body,form,#message,li {
+        body,form,#message,p {
           margin: 0;
           padding: 0;
           box-sizing: border-box;
@@ -14,7 +14,7 @@
         }
 
         form {
-          background: #000;
+          background: #D5D5D6;
           padding: 3px;
           position: fixed;
           bottom: 0;
@@ -30,45 +30,74 @@
 
         form button {
           width: 9%;
-          background: rgb(130, 224, 255);
+          background: #1DB9AA;
           border: none;
           padding: 10px;
+          color: white;
         }
 
         #messages {
-          list-style-type: none;
           margin: 0;
           padding: 0;
         }
 
-        #messages li {
+        #messages p {
           padding: 5px 10px;
+          position: absolute;
+          right: -1000px;
+          animation: slipleft 20s;
         }
 
-        #messages li:nth-child(odd) {
-          background: #eee;
-          text-align: right;
+        #onlineUsers {
+            text-align: center;
+            font-size: 20px;
+            color: #1DB1A4;
+        }
+
+        #onlineUsers span {
+            color: #FCFFFB;
+        }
+
+
+        @keyframes slipleft{
+            from {left: 100%;}
+            to {left: -1000px;display: none}
         }
     </style>
 </head>
 
 <body>
-    <ul id="messages"></ul>
+    <div id="messages"></div>
         <form action="">
+            <p id="onlineUsers">当前在线人数：
+                <span id="users"></span>
+            </p>
             <input id="m" autocomplete="off" />
-            <button>Send</button>
+            <button>发送</button>
         </form>
     <script src="/socket.io/socket.io.js"></script>
     <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
         var socket = io();
         $('form').submit(function(){
-            socket.emit('chat message', $('#m').val());
-            $('#m').val('');
+            socket.emit('danmu message', $('#m').val());
+            $('#m').val('').focus();
             return false;
          });
-         socket.on('chat message', function(msg){
-            $('#messages').append($('<li>').text(msg));
+
+         socket.on('danmu message', function(msg, color, top, fontSize){
+            var target = '<p style="color:' + color + ';margin-top:' + top + 'px;font-size:' + fontSize + 'px;">' + msg + '</p>';
+            $('#messages').append(target);
+         });
+
+         socket.on('connection', function(users) {
+             console.log('total users', users);
+             $('#users').html(users);
+         });
+
+         socket.on('disconnect', function(users) {
+             console.log('a user leave', users);
+             $('#users').html(users);
          });
     </script>
 </body>
